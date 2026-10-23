@@ -1,12 +1,14 @@
 
 const mongoose = require("mongoose");
-const Ticket = require("../models/Ticket");
 
+const Ticket = require("../models/Ticket");
+const User = require("../models/User");
+const Book = require("../models/Book");
+
+// GET /api/tickets
 const getTickets = async (req, res) => {
   try {
-    const tickets = await Ticket.find()
-      .sort({ createdAt: -1 })
-      .lean();
+    const tickets = await Ticket.find().sort({ createdAt: -1 });
 
     return res.status(200).json({
       success: true,
@@ -18,11 +20,12 @@ const getTickets = async (req, res) => {
 
     return res.status(500).json({
       success: false,
-      message: "Failed to retrieve tickets",
+      message: "Failed to fetch tickets.",
     });
   }
 };
 
+// POST /api/tickets
 const createTicket = async (req, res) => {
   try {
     const {
@@ -38,52 +41,47 @@ const createTicket = async (req, res) => {
     if (!authorId || !subject?.trim() || !description?.trim()) {
       return res.status(400).json({
         success: false,
-        message: "Author ID, subject and description are required",
+        message: "authorId, subject, and description are required.",
       });
     }
 
-    // Validate MongoDB IDs
-    if (!mongoose.isValidObjectId(authorId)) {
-      return res.status(400).json({
+    // Verify author exists
+    const author = await User.findOne({ author_id: authorId });
+
+    if (!author) {
+      return res.status(404).json({
         success: false,
-        message: "Invalid author ID",
+        message: "Author not found. Check the authorId.",
       });
     }
 
-    if (bookId && !mongoose.isValidObjectId(bookId)) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid book ID",
+    // Verify the optional book belongs to this author
+    if (bookId) {
+      const book = await Book.findOne({
+        book_id: bookId,
+        author_id: authorId,
       });
-    }
 
-    // Validate input lengths
-    if (subject.trim().length > 150) {
-      return res.status(400).json({
-        success: false,
-        message: "Subject cannot exceed 150 characters",
-      });
-    }
-
-    if (description.trim().length > 5000) {
-      return res.status(400).json({
-        success: false,
-        message: "Description cannot exceed 5000 characters",
-      });
+      if (!book) {
+        return res.status(400).json({
+          success: false,
+          message: "Book not found or does not belong to this author.",
+        });
+      }
     }
 
     const ticket = await Ticket.create({
-      author: authorId,
-      book: bookId || null,
+      authorId,
+      bookId: bookId || null,
       category: category || "General Inquiry",
-      subject: subject.trim(),
-      description: description.trim(),
+      subject,
+      description,
       attachment: attachment || null,
     });
 
     return res.status(201).json({
       success: true,
-      message: "Support ticket created successfully",
+      message: "Ticket created successfully.",
       ticket,
     });
   } catch (error) {
@@ -98,12 +96,9 @@ const createTicket = async (req, res) => {
 
     return res.status(500).json({
       success: false,
-      message: "Failed to create support ticket",
+      message: "Failed to create ticket.",
     });
   }
 };
 
-module.exports = {
-  getTickets,
-  createTicket,
-};
+module.exports = { getTickets, createTicket };

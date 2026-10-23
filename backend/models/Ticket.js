@@ -3,15 +3,14 @@ const mongoose = require("mongoose");
 
 const ticketSchema = new mongoose.Schema(
   {
-    author: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+    authorId: {
+      type: String,
       required: true,
+      index: true,
     },
 
-    book: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Book",
+    bookId: {
+      type: String,
       default: null,
     },
 
@@ -63,30 +62,41 @@ const ticketSchema = new mongoose.Schema(
 
     responses: [
       {
-        message: { type: String, required: true },
+        message: {
+          type: String,
+          required: true,
+        },
         senderRole: {
           type: String,
           enum: ["author", "admin"],
           required: true,
         },
-        createdAt: { type: Date, default: Date.now },
+        createdAt: {
+          type: Date,
+          default: Date.now,
+        },
       },
     ],
 
     internalNotes: [
       {
-        message: { type: String, required: true },
-        admin: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "User",
+        message: {
+          type: String,
+          required: true,
         },
-        createdAt: { type: Date, default: Date.now },
+        adminId: {
+          type: String,
+          default: null,
+        },
+        createdAt: {
+          type: Date,
+          default: Date.now,
+        },
       },
     ],
 
     assignedTo: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      type: String,
       default: null,
     },
   },
