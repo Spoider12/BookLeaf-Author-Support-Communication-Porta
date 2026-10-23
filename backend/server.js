@@ -4,6 +4,7 @@ const cookieParser = require("cookie-parser")
 const healthRoutes = require("./routes/health.routes")
 const dataRoutes = require("./routes/data.route");
 const ticketRoutes = require("./routes/ticket.routes");
+const authRoutes = require("./routes/auth.routes");
 require("dotenv").config();
 
 const connectDB = require("./config/db");
@@ -27,6 +28,7 @@ app.use(cookieParser());
 app.use("/", healthRoutes)
 app.use("/api", dataRoutes);
 app.use("/api/tickets", ticketRoutes);
+app.use("/api/auth", authRoutes);
 
 // Test API endpoint
 app.get("/", (req, res) => {
