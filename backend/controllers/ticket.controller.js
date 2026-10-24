@@ -28,34 +28,19 @@ const getTickets = async (req, res) => {
 // POST /api/tickets
 const createTicket = async (req, res) => {
   try {
-    const {
-      authorId,
-      bookId,
-      category,
-      subject,
-      description,
-      attachment,
-    } = req.body;
+    const { bookId, category, subject, description, attachment } = req.body;
 
-    // Validate required fields
-    if (!authorId || !subject?.trim() || !description?.trim()) {
+    if (!subject?.trim() || !description?.trim()) {
       return res.status(400).json({
         success: false,
-        message: "authorId, subject, and description are required.",
+        message: "Subject and description are required.",
       });
     }
 
-    // Verify author exists
-    const author = await User.findOne({ author_id: authorId });
+    // Get author ID from the authenticated user's token
+    const authorId = req.user.author_id;
 
-    if (!author) {
-      return res.status(404).json({
-        success: false,
-        message: "Author not found. Check the authorId.",
-      });
-    }
-
-    // Verify the optional book belongs to this author
+    // Verify that the selected book belongs to this author
     if (bookId) {
       const book = await Book.findOne({
         book_id: bookId,
@@ -65,7 +50,7 @@ const createTicket = async (req, res) => {
       if (!book) {
         return res.status(400).json({
           success: false,
-          message: "Book not found or does not belong to this author.",
+          message: "Book not found or does not belong to you.",
         });
       }
     }
@@ -74,8 +59,8 @@ const createTicket = async (req, res) => {
       authorId,
       bookId: bookId || null,
       category: category || "General Inquiry",
-      subject,
-      description,
+      subject: subject.trim(),
+      description: description.trim(),
       attachment: attachment || null,
     });
 
@@ -85,15 +70,7 @@ const createTicket = async (req, res) => {
       ticket,
     });
   } catch (error) {
-    console.error("Create ticket error:", error.message);
-
-    if (error.name === "ValidationError") {
-      return res.status(400).json({
-        success: false,
-        message: error.message,
-      });
-    }
-
+    console.error("Create ticket error:", error);
     return res.status(500).json({
       success: false,
       message: "Failed to create ticket.",
@@ -101,4 +78,62 @@ const createTicket = async (req, res) => {
   }
 };
 
-module.exports = { getTickets, createTicket };
+
+// PATCH /api/tickets/:ticketId/status
+// Admin only: update ticket status
+const updateTicketStatus = async (req, res) => {
+  try {
+    const { ticketId } = req.params;
+    const { status } = req.body;
+
+    const allowedStatuses = [
+      "Open",
+      "In Progress",
+      "Resolved",
+      "Closed",
+    ];
+
+    if (!mongoose.isValidObjectId(ticketId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid ticket ID.",
+      });
+    }
+
+    if (!allowedStatuses.includes(status)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid status. Choose Open, In Progress, Resolved, or Closed.",
+      });
+    }
+
+    const ticket = await Ticket.findByIdAndUpdate(
+      ticketId,
+      { $set: { status } },
+      { new: true, runValidators: true }
+    );
+
+    if (!ticket) {
+      return res.status(404).json({
+        success: false,
+        message: "Ticket not found.",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Ticket status updated successfully.",
+      ticket,
+    });
+  } catch (error) {
+    console.error("Update ticket status error:", error.message);
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to update ticket status.",
+    });
+  }
+};
+
+
+module.exports = { getTickets, createTicket, updateTicketStatus };
