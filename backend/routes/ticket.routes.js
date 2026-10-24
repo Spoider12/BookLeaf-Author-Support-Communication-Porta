@@ -50,6 +50,6 @@ router.patch(
 // Authors and admins can create tickets
 router.post("/", createTicket);
 // Admin-only: view all tickets
-router.get("/", authorize("admin"), getTickets);
+router.get("/", authorize("admin","author"), getTickets);
 
 module.exports = router;

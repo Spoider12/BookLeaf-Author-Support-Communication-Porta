@@ -83,9 +83,17 @@ const getTickets = async (req, res) => {
       }
     }
 
-    const tickets = await Ticket.find(filter).sort({
-      createdAt: -1,
-    });
+          if (req.user.role === "author") {
+            filter.authorId = req.user.author_id;
+          }
+
+      let query = Ticket.find(filter).sort({ createdAt: -1 });
+
+      if (req.user.role === "author") {
+        query = query.select("-internalNotes");
+      }
+
+      const tickets = await query;
 
     return res.status(200).json({
       success: true,
