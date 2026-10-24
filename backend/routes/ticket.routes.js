@@ -1,6 +1,12 @@
 
 const express = require("express");
-const { getTickets ,createTicket ,updateTicketStatus } = require("../controllers/ticket.controller");
+const { getTickets ,
+  createTicket ,
+  updateTicketStatus ,
+  assignTicket,
+  addInternalNote,
+  addTicketReply
+   } = require("../controllers/ticket.controller");
 const {
   protect,
   authorize,
@@ -10,6 +16,25 @@ const router = express.Router();
 
 // All ticket routes require authentication
 router.use(protect);
+// Ticket Replies
+router.post(
+  "/:ticketId/replies",
+  authorize("author", "admin"),
+  addTicketReply
+);
+//Assigning Ticket to the Support Agent
+router.patch(
+  "/:ticketId/assign",
+  authorize("admin"),
+  assignTicket
+);
+// Add some private Note which is hidden by the user 
+router.post(
+  "/:ticketId/internal-notes",
+  authorize("admin"),
+  addInternalNote
+);
+
 router.patch(
   "/:ticketId/status",
   authorize("admin"),
