@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require ("express")
 const cors = require("cors")
 const cookieParser = require("cookie-parser")
@@ -5,7 +6,7 @@ const healthRoutes = require("./routes/health.routes")
 const dataRoutes = require("./routes/data.route");
 const ticketRoutes = require("./routes/ticket.routes");
 const authRoutes = require("./routes/auth.routes");
-require("dotenv").config();
+
 
 const connectDB = require("./config/db");
 

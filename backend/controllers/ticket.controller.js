@@ -4,6 +4,7 @@ const mongoose = require("mongoose");
 const Ticket = require("../models/Ticket");
 const User = require("../models/User");
 const Book = require("../models/Book");
+const { classifyTicket } = require("../services/ai.service");
 
 // GET /api/tickets
 
@@ -131,6 +132,20 @@ const createTicket = async (req, res) => {
         });
       }
     }
+        let aiClassification = {
+          category: "General Inquiry",
+          priority: "Medium",
+          reason: "AI classification was unavailable.",
+        };
+
+          try {
+            aiClassification = await classifyTicket({
+              subject,
+              description,
+            });
+          } catch (error) {
+            console.error("Ticket AI classification failed:", error.message);
+          }
 
     const ticket = await Ticket.create({
       authorId,
@@ -139,6 +154,8 @@ const createTicket = async (req, res) => {
       subject: subject.trim(),
       description: description.trim(),
       attachment: attachment || null,
+      category: aiClassification.category,
+      priority: aiClassification.priority,
     });
 
     return res.status(201).json({
