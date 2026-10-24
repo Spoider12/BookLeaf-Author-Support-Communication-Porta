@@ -9,6 +9,7 @@ import AuthorDashboard from "./pages/author/authorDashboard.jsx";
 import MyBooks from "./pages/author/MyBooks.jsx";
 import MyTickets from "./pages/author/MyTickets.jsx";
 import CreateTicket from "./pages/author/CreateTicket.jsx";
+import AdminTickets from "./pages/admin/adminTickets.jsx"
 
 // Admin pages
 function AdminDashboard() {
@@ -20,14 +21,7 @@ function AdminDashboard() {
   );
 }
 
-function AdminTickets() {
-  return (
-    <div>
-      <h1>Ticket Queue</h1>
-      <p>Manage author support tickets here.</p>
-    </div>
-  );
-}
+
 
 // Author navigation
 const authorNavigation = [
