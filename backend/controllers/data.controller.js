@@ -9,20 +9,24 @@ const getAuthors = (req, res) => {
   });
 };
 
-const getBooks = (req, res) => {
-  const books = sampleData.authors.flatMap((author) =>
-    author.books.map((book) => ({
-      ...book,
-      author_id: author.author_id,
-      author_name: author.name,
-    }))
-  );
 
-  res.status(200).json({
+const getBooks = (req, res) => {
+  const books = sampleData.authors
+    .filter((author) => author.author_id === req.user.author_id)
+    .flatMap((author) =>
+      author.books.map((book) => ({
+        ...book,
+        author_id: author.author_id,
+        author_name: author.name,
+      }))
+    );
+
+  return res.status(200).json({
     success: true,
     count: books.length,
     books,
   });
 };
+
 
 module.exports = { getAuthors, getBooks };
