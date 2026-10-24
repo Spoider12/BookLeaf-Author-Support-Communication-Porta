@@ -4,7 +4,7 @@ const mongoose = require("mongoose");
 const Ticket = require("../models/Ticket");
 const User = require("../models/User");
 const Book = require("../models/Book");
-const { classifyTicket } = require("../services/ai.service");
+const { classifyTicket, generateReplyDraft } = require("../services/ai.service");
 
 // GET /api/tickets
 
@@ -405,7 +405,49 @@ const addTicketReply = async (req, res) => {
   }
 };
 
+const generateTicketReplyDraft = async (req, res) => {
+  try {
+    const { ticketId } = req.params;
+
+    if (!mongoose.isValidObjectId(ticketId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid ticket ID.",
+      });
+    }
+
+    const ticket = await Ticket.findById(ticketId);
+
+    if (!ticket) {
+      return res.status(404).json({
+        success: false,
+        message: "Ticket not found.",
+      });
+    }
+
+    const draft = await generateReplyDraft({
+      subject: ticket.subject,
+      description: ticket.description,
+      category: ticket.category,
+    });
+
+    return res.status(200).json({
+      success: true,
+      draft,
+    });
+  } catch (error) {
+    console.error("Generate AI reply draft error:", error.message);
+
+    return res.status(503).json({
+      success: false,
+      message:
+        "AI reply draft is currently unavailable. Please write the reply manually.",
+    });
+  }
+};
 
 
 
-module.exports = { getTickets, createTicket, updateTicketStatus,assignTicket,addInternalNote ,addTicketReply };
+
+
+module.exports = { getTickets, createTicket, updateTicketStatus,assignTicket,addInternalNote ,addTicketReply,generateTicketReplyDraft };
