@@ -1,11 +1,13 @@
 
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import api from "../api/axios";
 import "../styles/Auth.css";
 
 export default function Login() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const successMessage = location.state?.message;
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -49,6 +51,9 @@ export default function Login() {
       setLoading(false);
     }
   };
+  {successMessage && (
+  <p className="auth-success">{successMessage}</p>
+)}
 
   return (
     <main className="auth-page">
