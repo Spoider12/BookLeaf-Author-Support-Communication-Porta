@@ -10,16 +10,9 @@ import MyBooks from "./pages/author/MyBooks.jsx";
 import MyTickets from "./pages/author/MyTickets.jsx";
 import CreateTicket from "./pages/author/CreateTicket.jsx";
 import AdminTickets from "./pages/admin/adminTickets.jsx"
+import AdminDashboard from "./pages/admin/adminDashboard.jsx";
 
-// Admin pages
-function AdminDashboard() {
-  return (
-    <div>
-      <h1>Admin Dashboard</h1>
-      <p>Welcome to the BookLeaf administration portal.</p>
-    </div>
-  );
-}
+
 
 
 
