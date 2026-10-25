@@ -6,7 +6,8 @@ const { getTickets ,
   assignTicket,
   addInternalNote,
   addTicketReply,
-  generateTicketReplyDraft
+  generateTicketReplyDraft,
+  updateTicketClassification
    } = require("../controllers/ticket.controller");
 const {
   protect,
@@ -17,6 +18,14 @@ const router = express.Router();
 
 // All ticket routes require authentication
 router.use(protect);
+
+
+router.patch(
+  "/:ticketId/classification",
+  authorize("admin"),
+  updateTicketClassification
+);
+
 
 router.post(
   "/:ticketId/ai-draft",

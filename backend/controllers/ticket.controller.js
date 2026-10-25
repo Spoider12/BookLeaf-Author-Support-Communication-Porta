@@ -454,8 +454,95 @@ const generateTicketReplyDraft = async (req, res) => {
   }
 };
 
+const updateTicketClassification = async (req, res) => {
+  try {
+    const { ticketId } = req.params;
+    const { category, priority } = req.body;
+
+    const allowedCategories = [
+      "Royalty & Payments",
+      "ISBN & Metadata Issues",
+      "Printing & Quality",
+      "Distribution & Availability",
+      "Book Status & Production Updates",
+      "General Inquiry",
+      "General",
+      "Account Level",
+    ];
+
+    const allowedPriorities = ["Critical", "High", "Medium", "Low"];
+
+    if (!mongoose.isValidObjectId(ticketId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid ticket ID.",
+      });
+    }
+
+    // At least one field must be supplied.
+    if (category === undefined && priority === undefined) {
+      return res.status(400).json({
+        success: false,
+        message: "Provide a category, priority, or both.",
+      });
+    }
+
+    if (
+      category !== undefined &&
+      !allowedCategories.includes(category)
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid ticket category.",
+      });
+    }
+
+    if (
+      priority !== undefined &&
+      !allowedPriorities.includes(priority)
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid ticket priority.",
+      });
+    }
+
+    const updates = {};
+
+    if (category !== undefined) updates.category = category;
+    if (priority !== undefined) updates.priority = priority;
+
+    const ticket = await Ticket.findByIdAndUpdate(
+      ticketId,
+      { $set: updates },
+      { new: true, runValidators: true }
+    );
+
+    if (!ticket) {
+      return res.status(404).json({
+        success: false,
+        message: "Ticket not found.",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Ticket category and priority updated successfully.",
+      ticket,
+    });
+  } catch (error) {
+    console.error("Update ticket classification error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to update ticket category and priority.",
+    });
+  }
+};
 
 
 
 
-module.exports = { getTickets, createTicket, updateTicketStatus,assignTicket,addInternalNote ,addTicketReply,generateTicketReplyDraft };
+
+
+module.exports = { getTickets, createTicket, updateTicketStatus,assignTicket,addInternalNote ,addTicketReply,generateTicketReplyDraft,updateTicketClassification };
